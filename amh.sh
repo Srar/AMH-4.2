@@ -205,7 +205,7 @@ function InstallReady()
 	chmod +Rw /root/amh;
 
 	cd $AMHDir/packages;
-	wget http://amysql.com/file/AMH/4.2/conf.zip;
+	wget https://raw.githubusercontent.com/Srar/AMH-4.2/master/conf.zip;
 	unzip conf.zip -d $AMHDir/conf;
 }
 
@@ -256,7 +256,7 @@ function Uninstall()
 function InstallLibiconv()
 {
 	echo "[${LibiconvVersion} Installing] ************************************************** >>";
-	Downloadfile "${LibiconvVersion}.tar.gz" "http://code.amysql.com/files/${LibiconvVersion}.tar.gz";
+	Downloadfile "${LibiconvVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${LibiconvVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$LibiconvVersion;
 	echo "tar -zxf ${LibiconvVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$LibiconvVersion.tar.gz -C $AMHDir/packages/untar;
@@ -277,7 +277,7 @@ function InstallMysql()
 {
 	# [dir] /usr/local/mysql/
 	echo "[${MysqlVersion} Installing] ************************************************** >>";
-	Downloadfile "${MysqlVersion}.tar.gz" "http://code.amysql.com/files/${MysqlVersion}.tar.gz";
+	Downloadfile "${MysqlVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${MysqlVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$MysqlVersion;
 	echo "tar -zxf ${MysqlVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$MysqlVersion.tar.gz -C $AMHDir/packages/untar;
@@ -344,7 +344,7 @@ function InstallPhp()
 {
 	# [dir] /usr/local/php
 	echo "[${PhpVersion} Installing] ************************************************** >>";
-	Downloadfile "${PhpVersion}.tar.gz" "http://code.amysql.com/files/${PhpVersion}.tar.gz";
+	Downloadfile "${PhpVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${PhpVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$PhpVersion;
 	echo "tar -zxf ${PhpVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$PhpVersion.tar.gz -C $AMHDir/packages/untar;
@@ -384,7 +384,7 @@ function InstallNginx()
 {
 	# [dir] /usr/local/nginx
 	echo "[${NginxVersion} Installing] ************************************************** >>";
-	Downloadfile "${NginxVersion}.tar.gz" "http://code.amysql.com/files/${NginxVersion}.tar.gz";
+	Downloadfile "${NginxVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${NginxVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$NginxVersion;
 	echo "tar -zxf ${NginxVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$NginxVersion.tar.gz -C $AMHDir/packages/untar;
@@ -429,7 +429,7 @@ function InstallPureFTPd()
 {
 	# [dir] /etc/	/usr/local/bin	/usr/local/sbin
 	echo "[${PureFTPdVersion} Installing] ************************************************** >>";
-	Downloadfile "${PureFTPdVersion}.tar.gz" "http://code.amysql.com/files/${PureFTPdVersion}.tar.gz";
+	Downloadfile "${PureFTPdVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${PureFTPdVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$PureFTPdVersion;
 	echo "tar -zxf ${PureFTPdVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$PureFTPdVersion.tar.gz -C $AMHDir/packages/untar;
@@ -479,7 +479,7 @@ function InstallAMH()
 {
 	# [dir] /home/wwwroot/index/web
 	echo "[${AMHVersion} Installing] ************************************************** >>";
-	Downloadfile "${AMHVersion}.tar.gz" "http://code.amysql.com/files/${AMHVersion}.tar.gz";
+	Downloadfile "${AMHVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${AMHVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$AMHVersion;
 	echo "tar -xf ${AMHVersion}.tar.gz ing...";
 	tar -xf $AMHDir/packages/$AMHVersion.tar.gz -C $AMHDir/packages/untar;
@@ -516,7 +516,7 @@ function InstallAMS()
 {
 	# [dir] /home/wwwroot/index/web/ams
 	echo "[${AMSVersion} Installing] ************************************************** >>";
-	Downloadfile "${AMSVersion}.tar.gz" "http://code.amysql.com/files/${AMSVersion}.tar.gz";
+	Downloadfile "${AMSVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${AMSVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$AMSVersion;
 	echo "tar -xf ${AMSVersion}.tar.gz ing...";
 	tar -xf $AMHDir/packages/$AMSVersion.tar.gz -C $AMHDir/packages/untar;
