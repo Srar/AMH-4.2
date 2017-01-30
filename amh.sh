@@ -28,9 +28,9 @@ PHPDisable='';
 AMSVersion='ams-1.5.0107-02';
 AMHVersion='amh-4.2';
 LibiconvVersion='libiconv-1.14';
-MysqlVersion='mysql-5.5.34';
-PhpVersion='php-5.3.27p1';
-NginxVersion='nginx-1.4.7';
+MysqlVersion='mariadb-10.0.29';
+PhpVersion='php-5.6.30';
+NginxVersion='nginx-1.10.2';
 PureFTPdVersion='pure-ftpd-1.0.36';
 
 # Function List	*****************************************************************************
@@ -160,10 +160,12 @@ function InstallBasePackages()
 
 		cp /etc/yum.conf /etc/yum.conf.lnmp
 		sed -i 's:exclude=.*:exclude=:g' /etc/yum.conf
-		for packages in gcc gcc-c++ ncurses-devel libxml2-devel openssl-devel curl-devel libjpeg-devel libpng-devel autoconf pcre-devel libtool-libs freetype-devel gd zlib-devel zip unzip wget crontabs iptables file bison cmake patch mlocate flex diffutils automake make  readline-devel  glibc-devel glibc-static glib2-devel  bzip2-devel gettext-devel libcap-devel logrotate ftp openssl expect; do 
-			echo "[${packages} Installing] ************************************************** >>";
-			yum -y install $packages; 
-		done;
+		# for packages in gcc gcc-c++ ncurses-devel libxml2-devel openssl-devel curl-devel libjpeg-devel libpng-devel autoconf pcre-devel libtool-libs freetype-devel gd zlib-devel zip unzip wget crontabs iptables file bison cmake patch mlocate flex diffutils automake make  readline-devel  glibc-devel glibc-static glib2-devel  bzip2-devel gettext-devel libcap-devel logrotate ftp openssl expect; do 
+		# 	echo "[${packages} Installing] ************************************************** >>";
+		# 	yum -y install $packages; 
+		# done;
+		echo "[BasePackages Installing] ************************************************** >>";
+		yum -y install gcc gcc-c++ ncurses-devel libxml2-devel openssl-devel curl-devel libjpeg-devel libpng-devel autoconf pcre-devel libtool-libs freetype-devel gd zlib-devel zip unzip wget crontabs iptables file bison cmake patch mlocate flex diffutils automake make  readline-devel  glibc-devel glibc-static glib2-devel  bzip2-devel gettext-devel libcap-devel logrotate ftp openssl expect;
 		mv -f /etc/yum.conf.lnmp /etc/yum.conf;
 	else
 		apt-get remove -y apache2 apache2-doc apache2-utils apache2.2-common apache2.2-bin apache2-mpm-prefork apache2-doc apache2-mpm-worker mysql-client mysql-server mysql-common php;
@@ -205,7 +207,7 @@ function InstallReady()
 	chmod +Rw /root/amh;
 
 	cd $AMHDir/packages;
-	wget https://raw.githubusercontent.com/Srar/AMH-4.2/master/conf.zip;
+	wget https://amh.x-speed.cc/conf.zip;
 	unzip conf.zip -d $AMHDir/conf;
 }
 
@@ -241,7 +243,7 @@ function Uninstall()
 		amh module $line uninstall;
 	done;
 	rm -rf /usr/local/mysql/ /etc/my.cnf  /etc/ld.so.conf.d/mysql.conf /usr/bin/mysql /var/lock/subsys/mysql /var/spool/mail/mysql;
-	rm -rf /usr/local/php/ /usr/lib/php /etc/php.ini /etc/php.d /usr/local/zend;
+	rm -rf /opt/amh_php/ /usr/lib/php /etc/php.ini /etc/php.d /usr/local/zend;
 	rm -rf /home/wwwroot/;
 	rm -rf /etc/pure-ftpd.conf /etc/pam.d/ftp /usr/local/sbin/pure-ftpd /etc/pureftpd.passwd /etc/amh-iptables;
 	rm -rf /etc/logrotate.d/nginx /root/.mysqlroot;
@@ -256,7 +258,7 @@ function Uninstall()
 function InstallLibiconv()
 {
 	echo "[${LibiconvVersion} Installing] ************************************************** >>";
-	Downloadfile "${LibiconvVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${LibiconvVersion}.tar.gz";
+	Downloadfile "${LibiconvVersion}.tar.gz" "https://amh.x-speed.cc/${LibiconvVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$LibiconvVersion;
 	echo "tar -zxf ${LibiconvVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$LibiconvVersion.tar.gz -C $AMHDir/packages/untar;
@@ -275,54 +277,54 @@ function InstallLibiconv()
 
 function InstallMysql()
 {
-	# [dir] /usr/local/mysql/
+	# [dir] /opt/amh_mysql/
 	echo "[${MysqlVersion} Installing] ************************************************** >>";
-	Downloadfile "${MysqlVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${MysqlVersion}.tar.gz";
+	Downloadfile "${MysqlVersion}.tar.gz" "https://amh.x-speed.cc/${MysqlVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$MysqlVersion;
 	echo "tar -zxf ${MysqlVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$MysqlVersion.tar.gz -C $AMHDir/packages/untar;
 
-	if [ ! -f /usr/local/mysql/bin/mysql ]; then
+	if [ ! -f /opt/amh_mysql/bin/mysql ]; then
 		cd $AMHDir/packages/untar/$MysqlVersion;
 		groupadd mysql;
 		useradd -s /sbin/nologin -g mysql mysql;
-		cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mysql  -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci -DWITH_EXTRA_CHARSETS=complex -DWITH_READLINE=1 -DENABLED_LOCAL_INFILE=1;
+		cmake -DCMAKE_INSTALL_PREFIX=/opt/amh_mysql  -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci -DWITH_EXTRA_CHARSETS=complex -DWITH_READLINE=1 -DENABLED_LOCAL_INFILE=1;
 		#http://forge.mysql.com/wiki/Autotools_to_CMake_Transition_Guide
 		make -j $Cpunum;
 		make install;
-		chmod +w /usr/local/mysql;
-		chown -R mysql:mysql /usr/local/mysql;
+		chmod +w /opt/amh_mysql;
+		chown -R mysql:mysql /opt/amh_mysql;
 
-		rm -f /etc/mysql/my.cnf /usr/local/mysql/etc/my.cnf;
+		rm -f /etc/mysql/my.cnf /opt/amh_mysql/etc/my.cnf;
 		cp $AMHDir/conf/my.cnf /etc/my.cnf;
 		cp $AMHDir/conf/mysql /root/amh/mysql;
 		chmod +x /root/amh/mysql;
-		/usr/local/mysql/scripts/mysql_install_db --user=mysql --defaults-file=/etc/my.cnf --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data;
+		/opt/amh_mysql/scripts/mysql_install_db --user=mysql --defaults-file=/etc/my.cnf --basedir=/opt/amh_mysql --datadir=/opt/amh_mysql/data;
 		
 
 # EOF **********************************
 cat > /etc/ld.so.conf.d/mysql.conf<<EOF
-/usr/local/mysql/lib/mysql
+/opt/amh_mysql/lib/mysql
 /usr/local/lib
 EOF
 # **************************************
 
 		ldconfig;
 		if [ "$SysBit" == '64' ] ; then
-			ln -s /usr/local/mysql/lib/mysql /usr/lib64/mysql;
+			ln -s /opt/amh_mysql/lib/mysql /usr/lib64/mysql;
 		else
-			ln -s /usr/local/mysql/lib/mysql /usr/lib/mysql;
+			ln -s /opt/amh_mysql/lib/mysql /usr/lib/mysql;
 		fi;
-		chmod 775 /usr/local/mysql/support-files/mysql.server;
-		/usr/local/mysql/support-files/mysql.server start;
-		ln -s /usr/local/mysql/bin/mysql /usr/bin/mysql;
-		ln -s /usr/local/mysql/bin/mysqladmin /usr/bin/mysqladmin;
-		ln -s /usr/local/mysql/bin/mysqldump /usr/bin/mysqldump;
-		ln -s /usr/local/mysql/bin/myisamchk /usr/bin/myisamchk;
-		ln -s /usr/local/mysql/bin/mysqld_safe /usr/bin/mysqld_safe;
+		chmod 775 /opt/amh_mysql/support-files/mysql.server;
+		/opt/amh_mysql/support-files/mysql.server start;
+		ln -s /opt/amh_mysql/bin/mysql /usr/bin/mysql;
+		ln -s /opt/amh_mysql/bin/mysqladmin /usr/bin/mysqladmin;
+		ln -s /opt/amh_mysql/bin/mysqldump /usr/bin/mysqldump;
+		ln -s /opt/amh_mysql/bin/myisamchk /usr/bin/myisamchk;
+		ln -s /opt/amh_mysql/bin/mysqld_safe /usr/bin/mysqld_safe;
 
-		/usr/local/mysql/bin/mysqladmin password $MysqlPass;
-		rm -rf /usr/local/mysql/data/test;
+		/opt/amh_mysql/bin/mysqladmin password $MysqlPass;
+		rm -rf /opt/amh_mysql/data/test;
 
 # EOF **********************************
 mysql -hlocalhost -uroot -p$MysqlPass <<EOF
@@ -342,37 +344,37 @@ EOF
 
 function InstallPhp()
 {
-	# [dir] /usr/local/php
+	# [dir] /opt/amh_php
 	echo "[${PhpVersion} Installing] ************************************************** >>";
-	Downloadfile "${PhpVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${PhpVersion}.tar.gz";
+	Downloadfile "${PhpVersion}.tar.gz" "https://amh.x-speed.cc/${PhpVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$PhpVersion;
 	echo "tar -zxf ${PhpVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$PhpVersion.tar.gz -C $AMHDir/packages/untar;
 
-	if [ ! -d /usr/local/php ]; then
+	if [ ! -d /opt/amh_php ]; then
 		cd $AMHDir/packages/untar/$PhpVersion;
 		groupadd www;
 		useradd -m -s /sbin/nologin -g www www;
 		if [ "$InstallModel" == '1' ]; then
-			./configure --prefix=/usr/local/php --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-config-file-path=/etc --with-config-file-scan-dir=/etc/php.d --with-openssl --with-zlib  --with-curl --enable-ftp --with-gd --with-jpeg-dir --with-png-dir --with-freetype-dir --enable-gd-native-ttf --enable-mbstring --enable-zip --with-iconv=/usr/local/libiconv --with-mysql=/usr/local/mysql --without-pear $PHPDisable;
+			./configure --prefix=/opt/amh_php --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-config-file-path=/etc --with-config-file-scan-dir=/etc/php.d --with-openssl --with-zlib  --with-curl --enable-ftp --with-gd --with-jpeg-dir --with-png-dir --with-freetype-dir --enable-gd-native-ttf --enable-mbstring --enable-zip --with-iconv=/usr/local/libiconv --with-mysql=/opt/amh_mysql --without-pear $PHPDisable;
 		fi;
 		make -j $Cpunum;
 		make install;
 		
 		cp $AMHDir/conf/php.ini /etc/php.ini;
 		cp $AMHDir/conf/php /root/amh/php;
-		cp $AMHDir/conf/php-fpm.conf /usr/local/php/etc/php-fpm.conf;
-		cp $AMHDir/conf/php-fpm-template.conf /usr/local/php/etc/php-fpm-template.conf;
+		cp $AMHDir/conf/php-fpm.conf /opt/amh_php/etc/php-fpm.conf;
+		cp $AMHDir/conf/php-fpm-template.conf /opt/amh_php/etc/php-fpm-template.conf;
 		chmod +x /root/amh/php;
 		mkdir /etc/php.d;
-		mkdir /usr/local/php/etc/fpm;
-		mkdir /usr/local/php/var/run/pid;
-		touch /usr/local/php/etc/fpm/amh.conf;
-		/usr/local/php/sbin/php-fpm;
+		mkdir /opt/amh_php/etc/fpm;
+		mkdir /opt/amh_php/var/run/pid;
+		touch /opt/amh_php/etc/fpm/amh.conf;
+		/opt/amh_php/sbin/php-fpm;
 
-		ln -s /usr/local/php/bin/php /usr/bin/php;
-		ln -s /usr/local/php/bin/phpize /usr/bin/phpize;
-		ln -s /usr/local/php/sbin/php-fpm /usr/bin/php-fpm;
+		ln -s /opt/amh_php/bin/php /usr/bin/php;
+		ln -s /opt/amh_php/bin/phpize /usr/bin/phpize;
+		ln -s /opt/amh_php/sbin/php-fpm /usr/bin/php-fpm;
 
 		echo "[OK] ${PhpVersion} install completed.";
 	else
@@ -382,32 +384,32 @@ function InstallPhp()
 
 function InstallNginx()
 {
-	# [dir] /usr/local/nginx
+	# [dir] /opt/amh_nginx
 	echo "[${NginxVersion} Installing] ************************************************** >>";
-	Downloadfile "${NginxVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${NginxVersion}.tar.gz";
+	Downloadfile "${NginxVersion}.tar.gz" "https://amh.x-speed.cc/${NginxVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$NginxVersion;
 	echo "tar -zxf ${NginxVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$NginxVersion.tar.gz -C $AMHDir/packages/untar;
 
-	if [ ! -d /usr/local/nginx ]; then
+	if [ ! -d /opt/amh_nginx ]; then
 		cd $AMHDir/packages/untar/$NginxVersion;
-		./configure --prefix=/usr/local/nginx --user=www --group=www --with-http_ssl_module  --with-http_gzip_static_module --without-mail_pop3_module --without-mail_imap_module --without-mail_smtp_module --without-http_uwsgi_module --without-http_scgi_module ;
+		./configure --prefix=/opt/amh_nginx --user=www --group=www --with-http_ssl_module  --with-http_gzip_static_module --without-mail_pop3_module --without-mail_imap_module --without-mail_smtp_module --without-http_uwsgi_module --without-http_scgi_module ;
 		make -j $Cpunum;
 		make install;
 
-		mkdir -p /home/wwwroot/index /home/backup /usr/local/nginx/conf/vhost/  /usr/local/nginx/conf/vhost_stop/  /usr/local/nginx/conf/rewrite/;
+		mkdir -p /home/wwwroot/index /home/backup /opt/amh_nginx/conf/vhost/  /opt/amh_nginx/conf/vhost_stop/  /opt/amh_nginx/conf/rewrite/;
 		chown +w /home/wwwroot/index;
-		touch /usr/local/nginx/conf/rewrite/amh.conf;
+		touch /opt/amh_nginx/conf/rewrite/amh.conf;
 
-		cp $AMHDir/conf/nginx.conf /usr/local/nginx/conf/nginx.conf;
-		cp $AMHDir/conf/nginx-host.conf /usr/local/nginx/conf/nginx-host.conf;
-		cp $AMHDir/conf/fcgi.conf /usr/local/nginx/conf/fcgi.conf;
-		cp $AMHDir/conf/fcgi-host.conf /usr/local/nginx/conf/fcgi-host.conf;
+		cp $AMHDir/conf/nginx.conf /opt/amh_nginx/conf/nginx.conf;
+		cp $AMHDir/conf/nginx-host.conf /opt/amh_nginx/conf/nginx-host.conf;
+		cp $AMHDir/conf/fcgi.conf /opt/amh_nginx/conf/fcgi.conf;
+		cp $AMHDir/conf/fcgi-host.conf /opt/amh_nginx/conf/fcgi-host.conf;
 		cp $AMHDir/conf/nginx /root/amh/nginx;
 		cp $AMHDir/conf/host /root/amh/host;
 		chmod +x /root/amh/nginx;
 		chmod +x /root/amh/host;
-		sed -i 's/www.amysql.com/'$Domain'/g' /usr/local/nginx/conf/nginx.conf;
+		sed -i 's/www.amysql.com/'$Domain'/g' /opt/amh_nginx/conf/nginx.conf;
 
 		cd /home/wwwroot/index;
 		mkdir -p tmp etc/rsa bin usr/sbin log;
@@ -415,9 +417,9 @@ function InstallNginx()
 		chown mysql:mysql etc/rsa;
 		chmod 777 tmp;
 		[ "$SysBit" == '64' ] && mkdir lib64 || mkdir lib;
-		/usr/local/nginx/sbin/nginx;
-		/usr/local/php/sbin/php-fpm;
-		ln -s /usr/local/nginx/sbin/nginx /usr/bin/nginx;
+		/opt/amh_nginx/sbin/nginx;
+		/opt/amh_php/sbin/php-fpm;
+		ln -s /opt/amh_nginx/sbin/nginx /usr/bin/nginx;
 
 		echo "[OK] ${NginxVersion} install completed.";
 	else
@@ -429,7 +431,7 @@ function InstallPureFTPd()
 {
 	# [dir] /etc/	/usr/local/bin	/usr/local/sbin
 	echo "[${PureFTPdVersion} Installing] ************************************************** >>";
-	Downloadfile "${PureFTPdVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${PureFTPdVersion}.tar.gz";
+	Downloadfile "${PureFTPdVersion}.tar.gz" "https://amh.x-speed.cc/${PureFTPdVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$PureFTPdVersion;
 	echo "tar -zxf ${PureFTPdVersion}.tar.gz ing...";
 	tar -zxf $AMHDir/packages/$PureFTPdVersion.tar.gz -C $AMHDir/packages/untar;
@@ -479,7 +481,7 @@ function InstallAMH()
 {
 	# [dir] /home/wwwroot/index/web
 	echo "[${AMHVersion} Installing] ************************************************** >>";
-	Downloadfile "${AMHVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${AMHVersion}.tar.gz";
+	Downloadfile "${AMHVersion}.tar.gz" "https://amh.x-speed.cc/${AMHVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$AMHVersion;
 	echo "tar -xf ${AMHVersion}.tar.gz ing...";
 	tar -xf $AMHDir/packages/$AMHVersion.tar.gz -C $AMHDir/packages/untar;
@@ -503,7 +505,7 @@ function InstallAMH()
 		SedAMHPass=${AMHPass//&/\\\&};
 		SedAMHPass=${SedAMHPass//\'/\\\\\\\\\'\'};
 		sed -i "s/'AMHPass_amysql-amh'/'${SedAMHPass}_amysql-amh'/g" $AMHDir/conf/amh.sql;
-		/usr/local/mysql/bin/mysql -u root -p$MysqlPass < $AMHDir/conf/amh.sql;
+		/opt/amh_mysql//bin/mysql -u root -p$MysqlPass < $AMHDir/conf/amh.sql;
 		sed -i 's/amysql.com/amh.sh/' /root/amh/upgrade;
 
 		echo "[OK] ${AMHVersion} install completed.";
@@ -516,7 +518,7 @@ function InstallAMS()
 {
 	# [dir] /home/wwwroot/index/web/ams
 	echo "[${AMSVersion} Installing] ************************************************** >>";
-	Downloadfile "${AMSVersion}.tar.gz" "https://raw.githubusercontent.com/Srar/AMH-4.2/master/${AMSVersion}.tar.gz";
+	Downloadfile "${AMSVersion}.tar.gz" "https://amh.x-speed.cc/${AMSVersion}.tar.gz";
 	rm -rf $AMHDir/packages/untar/$AMSVersion;
 	echo "tar -xf ${AMSVersion}.tar.gz ing...";
 	tar -xf $AMHDir/packages/$AMSVersion.tar.gz -C $AMHDir/packages/untar;
@@ -551,7 +553,7 @@ InstallAMH;
 InstallAMS;
 
 
-if [ -s /usr/local/nginx ] && [ -s /usr/local/php ] && [ -s /usr/local/mysql ]; then
+if [ -s /opt/amh_nginx ] && [ -s /opt/amh_php ] && [ -s /opt/amh_mysql/ ]; then
 
 cp $AMHDir/conf/amh-start /etc/init.d/amh-start;
 chmod 775 /etc/init.d/amh-start;
@@ -588,10 +590,10 @@ echo '================================================================';
 	echo '';
 	echo '******* SSH Dirs *******';
 	echo 'WebSite: /home/wwwroot';
-	echo 'Nginx: /usr/local/nginx';
-	echo 'PHP: /usr/local/php';
-	echo 'MySQL: /usr/local/mysql';
-	echo 'MySQL-Data: /usr/local/mysql/data';
+	echo 'Nginx: /opt/amh_nginx';
+	echo 'PHP: /opt/amh_php';
+	echo 'MySQL: /opt/amh_mysql';
+	echo 'MySQL-Data: /opt/amh_mysql/data';
 	echo '';
 	echo "Start time: ${StartDate}";
 	echo "Completion time: $(date) (Use: $[($(date +%s)-StartDateSecond)/60] minute)";
